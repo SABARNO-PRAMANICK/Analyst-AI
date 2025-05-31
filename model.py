@@ -5,9 +5,9 @@ from together import Together
 import base64
 import docx
 import PyPDF2
+import streamlit as st
 
-# API Key setup
-TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+TOGETHER_API_KEY = st.secrets["TOGETHER_API_KEY"]
 SYSTEM_PROMPT = "You are an expert data analyst. Provide accurate, insightful responses or generate Python code as requested."
 
 def parse_spreadsheet(file_path):

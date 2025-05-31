@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+TOGETHER_API_KEY = st.secrets["TOGETHER_API_KEY"]
 
 st.title("Intelligent Data Analyst Agent")
 
@@ -36,4 +36,3 @@ if st.session_state.conversation_history:
     st.subheader("Conversation History")
     for msg in st.session_state.conversation_history:
         st.write(f"{msg['role'].capitalize()}: {msg['content']}")
-        
