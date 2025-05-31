@@ -39,7 +39,7 @@ def parse_spreadsheet(file_path):
 
 def generate_data_summary(df):
     """Generate a detailed summary of a DataFrame."""
-    if isinstance(df, str):  # Error message from parsing
+    if isinstance(df, str):
         return df
     summary = f"Columns: {list(df.columns)}\n"
     summary += f"Rows: {len(df)}\n"
@@ -94,13 +94,12 @@ def extract_code(response):
 
 def execute_code(code, df):
     """Execute generated Python code in the app's Python environment."""
-    if isinstance(df, str):  # Error from parsing
+    if isinstance(df, str):
         return df, None
     try:
         df.to_csv('temp_data.csv', index=False)
         with open('temp_script.py', 'w') as f:
             f.write(code)
-        # Use sys.executable to ensure the same Python environment
         result = subprocess.run(
             [sys.executable, 'temp_script.py'],
             capture_output=True,
@@ -128,13 +127,11 @@ def data_analyst_agent(file_path, user_request, conversation_history=[]):
     file_ext = os.path.splitext(file_path)[1].lower()
     client = Together(api_key=TOGETHER_API_KEY)
     
-    # Build conversation history string
     history_str = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in conversation_history])
     
-    # Process based on file type
     if file_ext in ['.csv', '.xlsx']:
         df = parse_spreadsheet(file_path)
-        if isinstance(df, str):  # Error from parsing
+        if isinstance(df, str):
             updated_history = conversation_history + [{"role": "user", "content": user_request}, {"role": "assistant", "content": df}]
             return df, None, updated_history
         
@@ -148,10 +145,8 @@ def data_analyst_agent(file_path, user_request, conversation_history=[]):
         )
         raw_response = response.choices[0].message.content.strip()
         
-        # Extract code from response
         code = extract_code(raw_response)
         if not code:
-            # Fallback: Generate a default visualization
             code = """
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -169,7 +164,6 @@ plt.savefig('output.png')
         else:
             text_response = "Analysis completed."
         
-        # Execute the generated or fallback code
         stdout, image_path = execute_code(code, df)
         text_response = f"{text_response}\nOutput:\n{stdout}" + (f"\n\nVisualization saved to {image_path}" if image_path else "")
         updated_history = conversation_history + [{"role": "user", "content": user_request}, {"role": "assistant", "content": text_response}]
