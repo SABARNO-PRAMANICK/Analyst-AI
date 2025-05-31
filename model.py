@@ -6,6 +6,9 @@ import base64
 import docx
 import PyPDF2
 import streamlit as st
+from docx import Document
+import numpy as np
+import re
 
 TOGETHER_API_KEY = st.secrets["TOGETHER_API_KEY"]
 if not TOGETHER_API_KEY:
