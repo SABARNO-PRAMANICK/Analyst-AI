@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-TOGETHER_API_KEY = st.secrets.get("TOGETHER_API_KEY")
+TOGETHER_API_KEY = st.secrets["TOGETHER_API_KEY"]
 
 st.title("Intelligent Data Analyst Agent")
 
