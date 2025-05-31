@@ -32,7 +32,7 @@ if submit_button and user_request and st.session_state.file_path:
         if image_path:
             st.image(image_path)
     except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
+        st.error(f"An error occurred: {str(e)}. Please check if all required libraries are installed and the API key is valid.")
 
 # Display conversation history
 if st.session_state.conversation_history:

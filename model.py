@@ -1,13 +1,15 @@
 import os
+import sys
 import subprocess
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from together import Together
 import base64
-import docx
+from docx import Document
 import PyPDF2
 import streamlit as st
-from docx import Document
-import numpy as np
 import re
 
 TOGETHER_API_KEY = st.secrets["TOGETHER_API_KEY"]
@@ -22,7 +24,7 @@ SYSTEM_PROMPT = """You are an expert data scientist with advanced analytical ski
 - Maintaining conversation context for follow-up questions.
 - Providing insightful, concise responses and asking for clarification if needed.
 
-For requests involving data analysis or visualization, return *only* executable Python code wrapped in ```python``` markers. Use pandas to read 'temp_data.csv' and save visualizations to 'output.png'. For non-code requests, provide a detailed answer. If the request is unclear, suggest a relevant analysis or visualization and return the corresponding code or answer."""
+For requests involving data analysis or visualization, return *only* executable Python code wrapped in ```python``` markers. Use pandas to read 'temp_data.csv' and save visualizations to 'output.png'. For analysis, print results. If the request is unclear (e.g., 'visualize'), generate code for a default visualization (e.g., histograms for numeric columns, bar chart for categorical columns). Do not include explanatory text outside the code block."""
 
 def parse_spreadsheet(file_path):
     """Parse CSV or Excel files into a pandas DataFrame."""
@@ -84,24 +86,23 @@ def encode_image_to_base64(file_path):
 
 def extract_code(response):
     """Extract Python code from the model response."""
-    # Look for code block with ```python or ```
     code_pattern = r'```(?:python)?\n(.*?)\n```'
     match = re.search(code_pattern, response, re.DOTALL)
     if match:
         return match.group(1).strip()
-    # If no code block, return None to trigger fallback
     return None
 
 def execute_code(code, df):
-    """Execute generated Python code securely."""
+    """Execute generated Python code in the app's Python environment."""
     if isinstance(df, str):  # Error from parsing
         return df, None
     try:
         df.to_csv('temp_data.csv', index=False)
         with open('temp_script.py', 'w') as f:
             f.write(code)
+        # Use sys.executable to ensure the same Python environment
         result = subprocess.run(
-            ['python', 'temp_script.py'],
+            [sys.executable, 'temp_script.py'],
             capture_output=True,
             text=True,
             timeout=30
@@ -150,7 +151,7 @@ def data_analyst_agent(file_path, user_request, conversation_history=[]):
         # Extract code from response
         code = extract_code(raw_response)
         if not code:
-            # Fallback: Generate a default visualization (histogram for numeric columns)
+            # Fallback: Generate a default visualization
             code = """
 import pandas as pd
 import matplotlib.pyplot as plt
